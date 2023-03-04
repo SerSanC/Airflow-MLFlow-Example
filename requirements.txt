@@ -1,0 +1,6 @@
+apache-airflow 
+# psycopg2 
+mlflow[extras] 
+scikit-learn 
+pandas 
+numpy 

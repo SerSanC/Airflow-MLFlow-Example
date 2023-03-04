@@ -1,0 +1,35 @@
+# docker-compose.yml
+services:
+  postgres:
+    image: postgres
+    container_name: pg_airflow
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=MYPASSWORD
+
+  webserver:
+    image: apache/airflow:2.5.1
+    # platform: linux/amd64
+    build: .
+    container_name: airflow
+    restart: always
+    depends_on:
+      - postgres
+    environment:
+      - LOAD_EX=n
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://postgres:MYPASSWORD@pg_airflow/postgres
+    volumes:
+      - ./:/root/airflow/dags
+      # Uncomment to include custom plugins
+      # - ./plugins:/usr/local/airflow/plugins
+    ports:
+      - "8080:8080"
+      - "8000:8000"
+    command: sh -c "(mlflow server -h 0.0.0.0 -p 8000 &) && airflow db init && (airflow scheduler &) && (airflow webserver ) "
+    # command: bash -c "airflow db init && (airflow scheduler &) && airflow webserver"
+    # g8vWhEaugmEkQxVC
+volumes:
+    db_data:
+      external: true
